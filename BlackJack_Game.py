@@ -1,7 +1,8 @@
 """CSC111 Winter 2023 Project Phase 2: Black Jack Algorithim
 Module Description
 ===============================
-This Python module contains a blablabla
+This Python module contains a bad a$$ thomas jack black game            TODO remove profanities
+
 Copyright and Usage Information
 ===============================
 This file is provided solely for the personal and private use of the
@@ -15,7 +16,7 @@ from __future__ import annotations
 from typing import Optional
 import random
 
-ALL_STATUSES = {"Player's Turn", "Dealer's Turn", "Game_End"}  # TODO ask david 🥴🥴
+ALL_STATUSES = {"Player's Turn", "Dealer's Turn", "Game_End"}
 
 
 class Card:
@@ -78,6 +79,14 @@ class Deck:
             for suit in suits:
                 self.deck[card_type].append(Card(card_type, card_info[card_type], suit))
 
+    def __len__(self) -> int:      
+        sum_so_far = 0
+
+        for card_type in self.deck:
+            sum_so_far += self.deck[card_type]
+
+        return sum_so_far
+
     def draw_card(self, participant: Participant) -> Card:
         """ Selects a random card from the deck, then removes and returns it.
         """
@@ -92,7 +101,7 @@ class Deck:
         if not self.deck[random_card_type]:
             self.deck.pop(random_card_type)
 
-        if random_card.name == "ace":  # TODO make a helper function to determine ace value
+        if random_card.name == "ace": 
             random_card.value = self.determine_ace_value(participant)
 
         # Update card sums
@@ -155,12 +164,12 @@ class Participant:
     #     NotImplementedError
 
     def hit(self, deck: Deck) -> None:
-        """hi david/to whom it may concern(random TA) we know how to do inheritance!
-        please give us bonus marks thank you"""
+        """The participant calls for another card to be added to their cards and for the current round of play"""
         NotImplementedError
 
     def stand(self) -> None:
-        """"""
+        """The participant will stop their turn of play and move on to the other participant or, if both 
+        participants turn has already ended, go end of the game"""
         NotImplementedError
 
 
@@ -206,11 +215,12 @@ class Dealer(Participant):
 
     # TODO, they dont hit if the player looses! (possibly resolved)
     def hit(self, deck: Deck) -> None:
-        """Draw a card"""
+        """The participant calls for another card to be added to their cards and for the current round of play"""
         deck.draw_card(self)
 
     def stand(self) -> str:
-        """..."""
+        """The participant will stop their turn of play and move on to the other participant or, if both 
+        participants turn has already ended, go end of the game"""
         pass
 
 
@@ -264,11 +274,12 @@ class Player(Participant):
             return "Stand"
 
     def hit(self, deck: Deck) -> None:
-        """Draw a card"""
+        """The participant calls for another card to be added to their cards and for the current round of play"""
         deck.draw_card(self)
 
     def stand(self) -> str:
-        """..."""
+        """The participant will stop their turn of play and move on to the other participant or, if both 
+        participants turn has already ended, go end of the game"""
         pass
 
 
@@ -319,7 +330,7 @@ class BlackJack:
         return self.handle_end_game()
 
     def handle_player_turn(self) -> None:
-        """
+        """The player's turn in the game. This take strategic planning to decide which move the player should make to do their best to win the game.
         """
         while self.current_turn == "Player's turn":  # FIXME hit_or_stand for player also checks this, so <21 might be redundant
 
@@ -336,7 +347,7 @@ class BlackJack:
         assert self.current_turn == "Dealer's Turn"  # TODO remove after testing
 
     def handle_dealer_turn(self) -> None:
-        """
+        """The dealer's turn to make a move that follows the rules the dealer can complete with the given game to try and win the game 
         """
         if self.player.sum_cards > 21:  # TODO is this condition necessary?
             while self.dealer.sum_cards < 17:
@@ -352,7 +363,7 @@ class BlackJack:
         assert self.current_turn == "Game_End"
 
     def handle_end_game(self) -> str:
-        """
+        """ Take the sum of the players cards and the sum of the dealers cards and compare them to see who won the game and return the winner
         """
         if self.player.sum_cards == 21 and self.dealer.sum_cards == 21:
             return 'Push (Tie)'
@@ -376,17 +387,29 @@ class BlackJack:
 
         else:
             return 'U fucked up and forgot a case'  # TODO remove after testing
+        
+    def _copy(self) -> BlackJack:
+        copied_game = BlackJack()
+        copied_game.current_turn = self.current_turn
+        copied_game.dealer = self.dealer
+        copied_game.player = self.player
+        copied_game.deck = self.deck
+        return copied_game
+        
+        
+    def update_deck_and_return_game_state(self, card_type: str) -> Optional[BlackJack]:
+        copied_game = self._copy()
 
+        # Remove from dictionary if all types of that card have been exhausted
+        if card_type not in self.deck.deck:
+            return None
+        else:
+            copied_game.deck.deck[card_type].pop(0)
 
-class ProbabilityTree:
-    """fghfh"""
-
-    move: str | tuple[str, ...]
-    guesser_win_probability: float
-    _subtrees: dict[str | tuple[str, ...], ProbabilityTree]
-
-    def __init__(self) -> None:
-        ...
+            if not self.deck.deck[card_type]:
+                self.deck.deck.pop(card_type)
+            
+            return copied_game
 
 
 if __name__ == '__main__':
