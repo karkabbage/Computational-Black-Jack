@@ -2,7 +2,6 @@
 Module Description
 ===============================
 This Python module contains a bad a$$ thomas jack black game            TODO remove profanities
-
 Copyright and Usage Information
 ===============================
 This file is provided solely for the personal and private use of the
@@ -21,7 +20,6 @@ ALL_STATUSES = {"Player's Turn", "Dealer's Turn", "Game_End"}
 
 class Card:
     """A Card Object that represents a card in the deck
-
     Instance Attributes:
     - name: the name-value of the card(ace, 2, 3, ... etc).
     - value:
@@ -35,7 +33,6 @@ class Card:
     - (self.name not in ['10', 'jack', 'queen', 'king']) or (self.value == 10)
     - (self.name not 'ace') or (self.value == (1,11))
     - (self.name not in ['2', '3', '4', '5', '6', '7', '8', '9', '10']) or (self.value == str(self.name))
-
     """
     name: str
     value: int | tuple[int]
@@ -50,17 +47,13 @@ class Card:
 
 class Deck:
     """The deck of cards
-
     Instance Attributes:
     - deck:
         A mapping containing the cards for this deck.
         Each key in the mapping is one of the 13 possible values in a deck, and the corresponding value
         is a list of the Card objects (one for each suit).
-
     Representation Invariants:
     - all[self.deck[card_type] != [] for card_type in self.deck]
-
-
     """
     deck: dict[str, list[Card]]
 
@@ -79,11 +72,20 @@ class Deck:
             for suit in suits:
                 self.deck[card_type].append(Card(card_type, card_info[card_type], suit))
 
-    def __len__(self) -> int:      
+    def copy(self) -> Deck:
+        """return a copy of the current deck state"""
+        copy_deck = Deck()
+        copy_deck.deck = {}
+        for card_type in self.deck:
+            copy_deck.deck[card_type] = self.deck[card_type].copy()
+
+        return copy_deck
+
+    def __len__(self) -> int:
         sum_so_far = 0
 
         for card_type in self.deck:
-            sum_so_far += self.deck[card_type]
+            sum_so_far += len(self.deck[card_type])
 
         return sum_so_far
 
@@ -101,7 +103,7 @@ class Deck:
         if not self.deck[random_card_type]:
             self.deck.pop(random_card_type)
 
-        if random_card.name == "ace": 
+        if random_card.name == "ace":
             random_card.value = self.determine_ace_value(participant)
 
         # Update card sums
@@ -122,6 +124,19 @@ class Deck:
             return 11
         else:
             return 1
+
+    def manual_take_out(self, card_type: str) -> None:
+        """hello"""
+        if card_type not in self.deck:  # this case should never happen
+            self.deck.pop(card_type)
+            raise ValueError
+
+        else:
+            self.deck[card_type].pop(0)
+
+            if self.deck[card_type] == []:
+                self.deck.pop(card_type)
+
 
 
 class Participant:
@@ -147,7 +162,7 @@ class Participant:
 
         self.first_card = None
         self.second_card = None
-        self.new_cards = [self.first_card, self.second_card]
+        self.new_cards = []
         self.sum_cards = 0
 
     def __repr__(self) -> str:
@@ -168,7 +183,7 @@ class Participant:
         NotImplementedError
 
     def stand(self) -> None:
-        """The participant will stop their turn of play and move on to the other participant or, if both 
+        """The participant will stop their turn of play and move on to the other participant or, if both
         participants turn has already ended, go end of the game"""
         NotImplementedError
 
@@ -219,24 +234,20 @@ class Dealer(Participant):
         deck.draw_card(self)
 
     def stand(self) -> str:
-        """The participant will stop their turn of play and move on to the other participant or, if both 
+        """The participant will stop their turn of play and move on to the other participant or, if both
         participants turn has already ended, go end of the game"""
         pass
 
 
 class Player(Participant):
     """
-
     A Player object that represents the current game state of the player's cards
-
     Instance Attributes:
     - intial_card_1: The first card obtained from the game, from the Deck.
     - intial_card_2: The second card obtained from the game, from the Deck.
-
     Representation Invariants:
     - intial_card_1 is not intial_card_2
     - all(card not in {self.intial_card_1, self.intial_card_2} for card in self.new_cards)
-
     """
 
     def __init__(self) -> None:
@@ -278,7 +289,7 @@ class Player(Participant):
         deck.draw_card(self)
 
     def stand(self) -> str:
-        """The participant will stop their turn of play and move on to the other participant or, if both 
+        """The participant will stop their turn of play and move on to the other participant or, if both
         participants turn has already ended, go end of the game"""
         pass
 
@@ -286,16 +297,13 @@ class Player(Participant):
 class BlackJack:
     """
     A class representing the game
-
      Instance Attributes:
      - deck: the deck for this game
      - dealer: the dealer for this game
      - player: the player for this game
      - current_turn: whose turn it currently is in the game
-
     Representation Invariants:
     - self.current_turn in {"Player's Turn", "Dealer's Turn", "Game End"}
-
     """
     deck: Deck
     dealer: Dealer
@@ -347,7 +355,7 @@ class BlackJack:
         assert self.current_turn == "Dealer's Turn"  # TODO remove after testing
 
     def handle_dealer_turn(self) -> None:
-        """The dealer's turn to make a move that follows the rules the dealer can complete with the given game to try and win the game 
+        """The dealer's turn to make a move that follows the rules the dealer can complete with the given game to try and win the game
         """
         if self.player.sum_cards > 21:  # TODO is this condition necessary?
             while self.dealer.sum_cards < 17:
@@ -387,29 +395,6 @@ class BlackJack:
 
         else:
             return 'U fucked up and forgot a case'  # TODO remove after testing
-        
-    def _copy(self) -> BlackJack:
-        copied_game = BlackJack()
-        copied_game.current_turn = self.current_turn
-        copied_game.dealer = self.dealer
-        copied_game.player = self.player
-        copied_game.deck = self.deck
-        return copied_game
-        
-        
-    def update_deck_and_return_game_state(self, card_type: str) -> Optional[BlackJack]:
-        copied_game = self._copy()
-
-        # Remove from dictionary if all types of that card have been exhausted
-        if card_type not in self.deck.deck:
-            return None
-        else:
-            copied_game.deck.deck[card_type].pop(0)
-
-            if not self.deck.deck[card_type]:
-                self.deck.deck.pop(card_type)
-            
-            return copied_game
 
 
 if __name__ == '__main__':
