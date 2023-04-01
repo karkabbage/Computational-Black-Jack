@@ -15,6 +15,8 @@ This file is Copyright (c) 2023 Alessia Ruberto, Karyna Lim, Rachel Kim, Sasha C
 from __future__ import annotations
 from typing import Optional
 import BlackJack_Game as bj
+import networkx as nx
+import matplotlib.pyplot as plt
 
 
 class SumNode:
@@ -140,6 +142,89 @@ class ProbabilityTree:
             str_so_far += subtree._str_indented(indent + 1)
         return str_so_far
 
+    def tree_to_graph(self, graph: nx.Graph, d: int) -> None:
+        """nrjknf
+        """
+        if not self._subtrees:
+            pass
+
+        else:
+            # add node version - FAIL --> values kept in this weird thing
+            '''sub_graph = nx.Graph()
+            temp = []
+            sub_graph.add_node(count, value=(self.root.current_total, d))
+
+            for subtree in self._subtrees:
+                count += 1
+                sub_graph.add_node(count, value=(self._subtrees[subtree].root.current_total, d + 1))
+                temp.append((0, count))
+
+            sub_graph.add_edges_from(temp)
+            graph.add_edges_from(sub_graph.edges)
+x
+            for subtree in self._subtrees:
+                self._subtrees[subtree].tree_to_graph(graph, d + 1, count + 1)'''
+
+            # labels version - FAIL --> the enumerate labels thing resets to 0 for the subtrees b/c recursion
+            '''temp = []
+
+            for subtree in self._subtrees:
+                tpl = (self._subtrees[subtree].root.current_total, d + 1)
+                temp.append(tpl)
+
+            labels = {i: l for i, l in enumerate(temp)}
+            nodes = labels.keys()
+            sub_graph = nx.Graph()
+            sub_graph.add_nodes_from(nodes)
+
+            graph.add_edges_from(sub_graph.edges)
+
+            for subtree in self._subtrees:
+                self._subtrees[subtree].tree_to_graph(graph, d + 1)'''
+
+            # ORIGINAL VERSION(adj_dict version) - FAIL --> later connects to existing nodes instead of making new ones
+            # --> BUT also most reliable of these attempts for stealing code
+            """adjacency_dict = {}
+            temp = []
+
+            for subtree in self._subtrees:
+                tpl = (self._subtrees[subtree].root.current_total, d + 1)
+                temp.append(tpl)
+
+            adjacency_dict[(self.root.current_total, d)] = tuple(temp)
+            sub_graph = nx.Graph(adjacency_dict)
+            graph.add_edges_from(sub_graph.edges)
+
+            for subtree in self._subtrees:
+                self._subtrees[subtree].tree_to_graph(graph, d + 1)"""
+
+
+def draw_graph(graph: nx.Graph) -> None:
+    """slnkfjsnf
+    """
+    pos = {}
+
+    for node in graph.nodes:
+        x = list(node)[0]
+        y = 0 - list(node)[1]
+        pos[node] = (x, y)
+
+    options = {
+        "font_size": 10,
+        "node_size": 2000,
+        "node_color": "white",
+        "edgecolors": "black",
+        "linewidths": 5,
+        "width": 5,
+    }
+
+    nx.draw_networkx(graph, pos, **options)
+
+    ax = plt.gca()
+    ax.margins(0.001)
+    plt.axis("off")
+    plt.show()
+
 
 if __name__ == '__main__':
     ...
@@ -151,17 +236,33 @@ if __name__ == '__main__':
     #     'max-line-length': 120
     # })
 
-"""
-testing shit:
 
-black_jack_intialized = bj.BlackJack()
-black_jack_intialized.dealer.initial_face_up = black_jack_intialized.deck.draw_card(black_jack_intialized.dealer)
-black_jack_intialized.dealer.initial_face_down = black_jack_intialized.deck.draw_card(black_jack_intialized.dealer)
-black_jack_intialized.player.first_card = black_jack_intialized.deck.draw_card(black_jack_intialized.player)
-black_jack_intialized.player.second_card = black_jack_intialized.deck.draw_card(black_jack_intialized.player)
-pt = ProbabilityTree(black_jack_intialized.player.sum_cards)
+def run_example_tree() -> ProbabilityTree:
+    """hi"""
 
-# won't work
-pt.generate_tree(black_jack_intialized, 0.5)
+    black_jack_intialized = bj.BlackJack()
+    black_jack_intialized.dealer.initial_face_up = black_jack_intialized.deck.draw_card(black_jack_intialized.dealer)
+    black_jack_intialized.dealer.initial_face_down = black_jack_intialized.deck.draw_card(black_jack_intialized.dealer)
+    black_jack_intialized.player.first_card = black_jack_intialized.deck.draw_card(black_jack_intialized.player)
+    black_jack_intialized.player.second_card = black_jack_intialized.deck.draw_card(black_jack_intialized.player)
+    pt = ProbabilityTree(black_jack_intialized.player.sum_cards)
+    return pt.generate_tree(black_jack_intialized.deck)
 
-"""
+
+def run_smallest_tree() -> ProbabilityTree:
+    """ slay
+    """
+    black_jack_intialized = bj.BlackJack()
+    pt = ProbabilityTree(19)
+    return pt.generate_tree(black_jack_intialized.deck)
+
+
+def run_draw() -> None:
+    """ *sobs*
+        *screams*
+        *yeets off building*
+    """
+    treey = run_smallest_tree()
+    graphy = nx.Graph()
+    treey.tree_to_graph(graphy, 0)
+    draw_graph(graphy)
