@@ -122,6 +122,7 @@ class ProbabilityTree:
         return {cardtype: (self._subtrees[cardtype], self._subtrees[cardtype].remaining) for cardtype in self._subtrees}
 
     def just_objects(self) -> list[ProbabilityTree]:
+        """only return the probability tree objects"""
         return [self._subtrees[cardtype] for cardtype in self._subtrees]
 
     def _str_indented(self, indent: int) -> str:
