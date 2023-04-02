@@ -17,7 +17,6 @@ This file is Copyright (c) 2023 Alessia Ruberto, Karyna Lim, Rachel Kim, Sasha C
 from __future__ import annotations
 from typing import Optional
 import black_jack_game as bj
-import plotly.graph_objects as go
 
 
 class SumNode:
@@ -88,20 +87,17 @@ class ProbabilityTree:
           (that can be added to current_sum) to the ProbabilityTree objects that represent the hypothetical
           scenario where that card type was drawn by the player.
 
-
-    Preconditions:
-    -
-
     Representation Invariants:
     - if the root of the tree represents a game state's current sum, then self.remaining is None (since self.remaining
       only represents the total avalible cards of a given type that produces its subtrees, and for the current sum
       root, remaining doesn't apply)
-    - if the root is a hypothetical tree, then self.remianinig is not None and is greater than 0 (since we remove
+    - if the root is a hypothetical tree, then self.remaining is not None and is greater than 0 (since we remove
       all the cards that have no more cards to draw from the deck, and those hypothetical trees were computed by
       'knowing' which card was drawn.)
     - elf._subtrees is empty iff the root.current_total >= target value for cards (ex: if target is 21, no
       subtrees should be computed for roots of a tree that are greater, since the player wouldn't need to hit again
       since a) they got to the target number or b) their current sum is greater and lost to the dealer / busted.)
+    - self.root.current_total is a valid number viable in the range of possible sums, depending on the target number.
 
     """
 
@@ -124,6 +120,9 @@ class ProbabilityTree:
         cards of that type that could have been drawn from the deck. """
 
         return {cardtype: (self._subtrees[cardtype], self._subtrees[cardtype].remaining) for cardtype in self._subtrees}
+
+    def just_objects(self) -> list[ProbabilityTree]:
+        return [self._subtrees[cardtype] for cardtype in self._subtrees]
 
     def _str_indented(self, indent: int) -> str:
         """ Return a str representation of all roots current_total indented by their subtree locations"""
@@ -187,12 +186,14 @@ class ProbabilityTree:
                 self._subtrees[card_type] = ProbabilityTree(total_for_subtree_node)
 
             for subtree_str in self._subtrees:
-                # compute copy of new blackjack assuming this one card was taken out!
+                # how many of this card type was there for self.root to choose from?
                 self._subtrees[subtree_str].remaining = len(deck_class[subtree_str])
 
                 deck_copy = decky.copy_deck_and_draw_specific_card(subtree_str)
 
                 # same threshold as before
+                # compute copy of new blackjack assuming this one card was taken out!
+                # hence why a hypothetical deck copy was computed
                 self._subtrees[subtree_str].generate_tree(deck_copy, target)
 
         return self
@@ -209,10 +210,10 @@ class ProbabilityTree:
         """
 
         current_value = self.root.current_total
-        assert self.root.move == 'hit'
+        # assert self.root.move == 'hit'
 
         if current_value >= target:
-            # in case recursed to a tree value greater, which it SHOULDN'T
+            # in case recursed to a tree value greater than the target, which it SHOULDN'T
             return 'stand'
 
         else:
@@ -224,125 +225,87 @@ class ProbabilityTree:
                 if self._subtrees[card_type].root.current_total > target:
                     standing_proportion += len(curr_deck.deck[card_type])
 
-            print(standing_proportion)
-            print(total_cards)
             stat = standing_proportion / total_cards
+            print(stat)
 
             if stat <= threshold:
-                return 'hit'
+                return "hit"
             else:
-                return 'stand'
+                return "stand"
 
-    # def generate_tree(self, decky: bj.Deck) -> ProbabilityTree:
+    # def tree_to_graph(self, graph: nx.Graph, d: int) -> None:
+    #     """nrjknf
     #     """
-    #     return the move the player should do assuming they will win
-    #     and with respect to their bust-probability-threshold
-    #     Representation Invariants:
-    #     - timeout karyna
-    #
-    #     """
-    #
-    #     # base case
-    #     # okay i guess self.threshold is the proportion of busting and threshold is actually
-    #     # the thing we've been comparing since the beginning
-    #
-    #     if self.root.current_total >= 21:
-    #         # example, we chose 50% of busting, we'll stand, and we got a 52% chance of picking a card
-    #         # that'll ensure we don't bust, so we WONT stand.
-    #         # if we got a 40% chance of picking a card where we wont bust, we WILL stand, cos its lower
-    #         # than our desired threshold to bust. ie. we got 60% chance of busting over us only being ok at 50%
-    #
-    #         # my logic, you can't have a probabilitly sent out, it has to be predetermined
-    #         # so even with intializing the probability at 1.0, it works for SumNodes that
-    #         # haven't computed their fraction yet.
-    #
-    #         self.root.move = "stand"
-    #         return self
-    #
-    #     # recursive step
-    #     else:
-    #         # the move to get here was a hit
-    #         self.root.move = "hit"
-    #         deck_class = decky.deck
-    #
-    #         # underneath, calculating probability score
-    #         # compute probability to hit or stand and need length to compute probabilities
-    #
-    #         # compute all possible subtrees,
-    #         for card_type in deck_class:
-    #
-    #             # each element is a string of the card
-    #             if card_type == 'ace' and self.root.current_total + 11 > 21:
-    #                 value_to_add = 1
-    #             elif card_type == 'ace' and self.root.current_total + 11 <= 21:
-    #                 value_to_add = 11
-    #             else:
-    #                 value_to_add = deck_class[card_type][0].value
-    #                 # know we can always index 0 since the card is in here
-    #
-    #             total_for_subtree_node = value_to_add + self.root.current_total
-    #
-    #             # else:
-    #             #     hitting_proportion += len(deck_class[card_type])
-    #
-    #             # actually adding the values to our probability tree
-    #             self._subtrees[card_type] = ProbabilityTree(total_for_subtree_node)
-    #
-    #         for subtree_str in self._subtrees:
-    #             # compute copy of new blackjack assuming this one card was taken out!
-    #             self._subtrees[subtree_str].remaining = len(deck_class[subtree_str])
-    #
-    #             deck_copy = decky.copy_deck_and_draw_specific_card(subtree_str)
-    #
-    #             # same threshold as before
-    #             self._subtrees[subtree_str].generate_tree(deck_copy)
-    #
-    #     return self
-    #
-    # def hit_or_stand_threshold(self, threshold: float, curr_deck: bj.Deck) -> str:
-    #     """ compute suggested moves based on acceptable loss probability (threshold)
-    #
-    #     suggested after the first root is random, based on the random card it bases
-    #
-    #     The threshold is defined as the percentage the player is alright with 'busting'
-    #
-    #     ex: if the threshold was 0.5, and the computed threshold (which this function will calculate
-    #     based on the generated probability tree) is less than or equal to this probability, the
-    #     program will suggest it to keep hitting. if the computed threshold is greater than the
-    #     percentage the user input, we'll suggest them to stand, which is the last value of the output
-    #     list (output_list[-1] )
-    #     )
-    #
-    #     Preconditions:
-    #     - tree must be a generated tree
-    #     - 0.0 <= threshold <= 1.0
-    #     """
-    #
-    #     current_value = self.root.current_total
-    #     #assert self.root.move == 'hit'
-    #
-    #     if current_value >= 21:
-    #         # in case recursed to a tree value greater, which it SHOULDN'T
-    #         return 'stand'
+    #     if not self._subtrees:
+    #         pass
     #
     #     else:
+    #         # add node version - FAIL --> values kept in this weird thing
+    #         '''sub_graph = nx.Graph()
+    #         temp = []
+    #         sub_graph.add_node(count, value=(self.root.current_total, d))
+    #         for subtree in self._subtrees:
+    #             count += 1
+    #             sub_graph.add_node(count, value=(self._subtrees[subtree].root.current_total, d + 1))
+    #             temp.append((0, count))
+    #         sub_graph.add_edges_from(temp)
+    #         graph.add_edges_from(sub_graph.edges)
+    # x
+    #         for subtree in self._subtrees:
+    #             self._subtrees[subtree].tree_to_graph(graph, d + 1, count + 1)'''
     #
-    #         standing_proportion = 0
-    #         total_cards = curr_deck.__len__()
+    #         # labels version - FAIL --> the enumerate labels thing resets to 0 for the subtrees b/c recursion
+    #         '''temp = []
+    #         for subtree in self._subtrees:
+    #             tpl = (self._subtrees[subtree].root.current_total, d + 1)
+    #             temp.append(tpl)
+    #         labels = {i: l for i, l in enumerate(temp)}
+    #         nodes = labels.keys()
+    #         sub_graph = nx.Graph()
+    #         sub_graph.add_nodes_from(nodes)
+    #         graph.add_edges_from(sub_graph.edges)
+    #         for subtree in self._subtrees:
+    #             self._subtrees[subtree].tree_to_graph(graph, d + 1)'''
     #
-    #         for card_type in self._subtrees:
-    #             if self._subtrees[card_type].root.current_total > 21:
-    #                 standing_proportion += len(curr_deck.deck[card_type])
+    #         # ORIGINAL VERSION(adj_dict version) - FAIL --> later connects to existing nodes instead of making new ones
+    #         # --> BUT also most reliable of these attempts for stealing code
+    #         """adjacency_dict = {}
+    #         temp = []
+    #         for subtree in self._subtrees:
+    #             tpl = (self._subtrees[subtree].root.current_total, d + 1)
+    #             temp.append(tpl)
+    #         adjacency_dict[(self.root.current_total, d)] = tuple(temp)
+    #         sub_graph = nx.Graph(adjacency_dict)
+    #         graph.add_edges_from(sub_graph.edges)
+    #         for subtree in self._subtrees:
+    #             self._subtrees[subtree].tree_to_graph(graph, d + 1)"""
     #
-    #         print(standing_proportion)
-    #         print(total_cards)
-    #         stat = standing_proportion / total_cards
     #
-    #         if stat <= threshold:
-    #             return 'hit'
+    # def draw_graph(graph: nx.Graph) -> None:
+    #     """slnkfjsnf
+    #     """
+    #     pos = {}
     #
-    #         else:
-    #             return 'stand'
+    #     for node in graph.nodes:
+    #         x = list(node)[0]
+    #         y = 0 - list(node)[1]
+    #         pos[node] = (x, y)
+    #
+    #     options = {
+    #         "font_size": 10,
+    #         "node_size": 2000,
+    #         "node_color": "white",
+    #         "edgecolors": "black",
+    #         "linewidths": 5,
+    #         "width": 5,
+    #     }
+    #
+    #     nx.draw_networkx(graph, pos, **options)
+    #
+    #     ax = plt.gca()
+    #     ax.margins(0.001)
+    #     plt.axis("off")
+    #     plt.show()
 
 
 def run_example_tree() -> ProbabilityTree:

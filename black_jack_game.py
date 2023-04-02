@@ -1,7 +1,7 @@
 """CSC111 Winter 2023 Project Phase 2: Black Jack Algorithim
 Module Description
 ===============================
-This Python module contains a bad a$$ thomas jack black game            TODO remove profanities
+
 Copyright and Usage Information
 ===============================
 This file is provided solely for the personal and private use of the
@@ -19,12 +19,14 @@ import probability_tree as tree
 
 class Card:
     """A Card Object that represents a card in the deck
+
     Instance Attributes:
     - name: the name-value of the card(ace, 2, 3, ... etc).
     - value:
         The numerical value of the card, corresponding to its name.
         In the initialization, the Ace is automatically given the value of 11 instead of 1.
     - suit: the suit of the card(heart, diamond, spade, club).
+
     Representation Invariants:
     - self.name in ['ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'king', 'queen', 'jack']
     - self.value in [2, 3, 4, 5, 6, 7, 8, 9, 10, (11, 1)]
@@ -45,18 +47,23 @@ class Card:
 
 
 class Deck:
-    """The deck of cards
+    """ The deck class of Card objects
+
     Instance Attributes:
     - deck:
         A mapping containing the cards for this deck.
         Each key in the mapping is one of the 13 possible values in a deck, and the corresponding value
         is a list of the Card objects (one for each suit).
+
     Representation Invariants:
     - all[self.deck[card_type] != [] for card_type in self.deck]
+    - all[1 <= len(self.deck[card_type]) <= 4 for card_type in self.deck]
+
     """
     deck: dict[str, list[Card]]
 
     def __init__(self) -> None:
+        """Intialize a new deck card object"""
         self._load_standard_deck()
 
     def _load_standard_deck(self) -> None:
@@ -223,7 +230,7 @@ class Dealer(Participant):
 
         total_player_sum = current_player.sum_cards
 
-        if total_player_sum > target or self.sum_cards > 17:
+        if total_player_sum > target and self.sum_cards > target - 4:
 
             return 'Stand'
 
@@ -334,7 +341,7 @@ class BlackJack:
 
         while self.current_turn != "Game_End":  # TODO loop might be redundant (atleast for original version)
 
-            self.handle_player_turn()
+            self.handle_player_turn(target)
             self.handle_dealer_turn(target)
             # TODO
 
@@ -358,13 +365,15 @@ class BlackJack:
 
         # make tree of all possibilities
         pt = tree.ProbabilityTree(self.player.sum_cards)
-        generated_tree = pt.generate_tree(self.deck)
+        generated_tree = pt.generate_tree(self.deck, target)
+
+        self.current_turn = "Player's turn"
 
         while self.current_turn != "Game_End":
             self.handle_player_turn_v2(generated_tree, threshold, target)
             self.handle_dealer_turn(target)
 
-        print([card.value for card in self.player.new_cards])
+        print([card.value for card in self.player.new_cards])  # FIXME
         print([card.value for card in self.dealer.new_cards])
 
         return self.handle_end_game(target)
@@ -382,9 +391,9 @@ class BlackJack:
             else:
                 self.player.stand()  # keep this to visualize the action and in case another player child class
                 # inherits a different method
-                self.current_turn = "Dealer's Turn"
+                self.current_turn = "Dealer's turn"
 
-        assert self.current_turn == "Dealer's Turn"  # TODO remove after testing
+        assert self.current_turn == "Dealer's turn"  # TODO remove after testing
 
     def handle_player_turn_v2(self, probability_tree: tree.ProbabilityTree, threshold: float,
                               target: int) -> None:
@@ -393,9 +402,13 @@ class BlackJack:
         curr_tree_depth = probability_tree
 
         while self.current_turn == "Player's turn":
-            suggested_move = curr_tree_depth.hit_or_stand_threshold(threshold=threshold, curr_deck=self.deck)
+            suggested_move = curr_tree_depth.hit_or_stand_threshold(threshold=threshold, curr_deck=self.deck, target=target)
 
-            if suggested_move == "hit" and self.player.sum_cards < target:
+            if self.player.sum_cards >= target or suggested_move== "stand":
+                self.player.stand()
+                self.current_turn = "Dealer's turn"
+
+            elif suggested_move == "hit" and self.player.sum_cards < target:
                 # no choice but to stand if over the target of 21
 
                 self.player.hit(self.deck)
@@ -405,16 +418,16 @@ class BlackJack:
             else:
                 self.player.stand()  # keep this to visualize the action and in case another player child class
                 # inherits a different method
-                self.current_turn = "Dealer's Turn"
+                self.current_turn = "Dealer's turn"
 
-        assert self.current_turn == "Dealer's Turn"
+        assert self.current_turn == "Dealer's turn"
 
     def handle_dealer_turn(self, target: int) -> None:
         """The dealer's turn to make a move that follows the rules the dealer can complete with the given game to try and win the game
         """
-        if self.player.sum_cards <= target:
-            while self.dealer.sum_cards <= 17:
-                self.dealer.hit(self.deck)
+        #if self.player.sum_cards <= target:
+        while self.player.sum_cards <= target and self.dealer.sum_cards <= target - 4: # changed from 17 in original blackjack game
+            self.dealer.hit(self.deck)
 
         self.current_turn = 'Game_End'
         assert self.current_turn == "Game_End"
