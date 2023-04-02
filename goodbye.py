@@ -142,71 +142,44 @@ class ProbabilityTree:
             str_so_far += subtree._str_indented(indent + 1)
         return str_so_far
 
-    def tree_to_graph(self, graph: nx.Graph, d: int) -> None:
-        """nrjknf
+    def tree_to_graph(self, graph: nx.Graph, root_id: int, id_count: int) -> None:
+        """ Represent a given probability tree as a NetworkX graph, using recursion.
         """
+        # base case
         if not self._subtrees:
             pass
 
+        # recursive step
         else:
-            # add node version - FAIL --> values kept in this weird thing
-            '''sub_graph = nx.Graph()
-            temp = []
-            sub_graph.add_node(count, value=(self.root.current_total, d))
-
-            for subtree in self._subtrees:
-                count += 1
-                sub_graph.add_node(count, value=(self._subtrees[subtree].root.current_total, d + 1))
-                temp.append((0, count))
-
-            sub_graph.add_edges_from(temp)
-            graph.add_edges_from(sub_graph.edges)
-x
-            for subtree in self._subtrees:
-                self._subtrees[subtree].tree_to_graph(graph, d + 1, count + 1)'''
-
-            # labels version - FAIL --> the enumerate labels thing resets to 0 for the subtrees b/c recursion
-            '''temp = []
-
-            for subtree in self._subtrees:
-                tpl = (self._subtrees[subtree].root.current_total, d + 1)
-                temp.append(tpl)
-
-            labels = {i: l for i, l in enumerate(temp)}
-            nodes = labels.keys()
-            sub_graph = nx.Graph()
-            sub_graph.add_nodes_from(nodes)
-
-            graph.add_edges_from(sub_graph.edges)
-
-            for subtree in self._subtrees:
-                self._subtrees[subtree].tree_to_graph(graph, d + 1)'''
-
-            # ORIGINAL VERSION(adj_dict version) - FAIL --> later connects to existing nodes instead of making new ones
-            # --> BUT also most reliable of these attempts for stealing code
-            """adjacency_dict = {}
+            adjacency_dict = {}
             temp = []
 
             for subtree in self._subtrees:
-                tpl = (self._subtrees[subtree].root.current_total, d + 1)
+                tpl = (self._subtrees[subtree].root.current_total, id_count)
+                id_count += 1
                 temp.append(tpl)
 
-            adjacency_dict[(self.root.current_total, d)] = tuple(temp)
+            adjacency_dict[(self.root.current_total, root_id)] = tuple(temp)
             sub_graph = nx.Graph(adjacency_dict)
             graph.add_edges_from(sub_graph.edges)
 
             for subtree in self._subtrees:
-                self._subtrees[subtree].tree_to_graph(graph, d + 1)"""
+                new_id = list(temp)[list(self._subtrees).index(subtree)][1]
+                self._subtrees[subtree].tree_to_graph(graph, new_id, id_count)
 
 
 def draw_graph(graph: nx.Graph) -> None:
-    """slnkfjsnf
+    """ Create a visual representation of a given NetworkX Graph
     """
     pos = {}
 
+    x = 0
     for node in graph.nodes:
-        x = list(node)[0]
-        y = 0 - list(node)[1]
+        if list(node)[1] == 0:
+            y = 0
+        else:
+            x += 10
+            y = 0 - ((list(node)[1] - 1) // 13 + 1)
         pos[node] = (x, y)
 
     options = {
@@ -214,8 +187,8 @@ def draw_graph(graph: nx.Graph) -> None:
         "node_size": 2000,
         "node_color": "white",
         "edgecolors": "black",
-        "linewidths": 5,
-        "width": 5,
+        "linewidths": 3,
+        "width": 3,
     }
 
     nx.draw_networkx(graph, pos, **options)
@@ -253,7 +226,7 @@ def run_smallest_tree() -> ProbabilityTree:
     """ slay
     """
     black_jack_intialized = bj.BlackJack()
-    pt = ProbabilityTree(19)
+    pt = ProbabilityTree(18)
     return pt.generate_tree(black_jack_intialized.deck)
 
 
@@ -264,5 +237,5 @@ def run_draw() -> None:
     """
     treey = run_smallest_tree()
     graphy = nx.Graph()
-    treey.tree_to_graph(graphy, 0)
+    treey.tree_to_graph(graphy, 0, 1)
     draw_graph(graphy)
