@@ -31,7 +31,7 @@ def gen_and_graph_basic_pie(target: int, num_games: int) -> None:
 
     Preconditions:
         - 0.0 <= threshold <= 1.0
-        - target >= 4
+        - 19 <= target <= 23
         - num_games > 0
     """
     df = create_dataframe_basic(target, num_games)
@@ -45,7 +45,7 @@ def gen_and_graph_strategical_pie(target: int, num_games: int, threshold: float)
 
     Preconditions:
         - 0.0 <= threshold <= 1.0
-        - target >= 4
+        - 19 <= target <= 23
         - num_games > 0
     """
     df = create_dataframe_strategic(target, threshold, num_games)
@@ -61,7 +61,7 @@ def gen_and_graph_dual_bar(target: int, num_games: int, threshold: float) -> Non
 
     Preconditions:
         - 0.0 <= threshold <= 1.0
-        - target >= 4
+        - 19 <= target <= 23
         - num_games > 0
     """
     df = create_dataframe_compare_two(target, threshold, num_games)
@@ -181,7 +181,7 @@ def create_dataframe_basic(target: int, num_games: int, specify_type: Optional[b
         - When specify_type == True, it adds a new collumn specifying the game mode.
 
     Preconditions:
-        - target >= 4
+        - 19 <= target <= 23
         - num_games > 0
     """
 
@@ -209,7 +209,7 @@ def create_dataframe_strategic(target: int, threshold: float, num_games: int,
 
     Preconditions:
         - 0.0 <= threshold <= 1.0
-        - target >= 4
+        - 19 <= target <= 23
         - num_games > 0
     """
 
@@ -235,7 +235,7 @@ def create_dataframe_compare_two(target: int, threshold: float, num_games: int) 
 
     Preconditions:
         - 0.0 <= threshold <= 1.0
-        - target >= 4
+        - 19 <= target <= 23
         - num_games > 0
     """
     df_basic = create_dataframe_basic(target, num_games, True)
@@ -249,9 +249,6 @@ def create_dataframe_compare_two(target: int, threshold: float, num_games: int) 
 # ====================================================================================================================
 def graph_pie_chart(df: pd.DataFrame, title: Optional[str] = None) -> None:
     """Creates and displays a pie chart comparing the number of occurences for player/dealer wins and ties.
-
-    Preconditions
-        - title must be a string
     """
     val = [df['Player Wins'][0], df['Dealer Wins'][0], df['Push (Tie)'][0]]
     colour_map = {'Player Wins': BLUE, 'Dealer Wins': PINK, 'Push (Tie)': GREEN}
@@ -264,9 +261,6 @@ def graph_pie_chart(df: pd.DataFrame, title: Optional[str] = None) -> None:
 def graph_grouped_bar(df: pd.DataFrame, title: Optional[str] = None) -> None:
     """Creates and displays a grouped comparing the game mode with the number of occurences for player/dealer wins
     and ties.
-
-    Preconditions
-        - title must be a string
     """
     colour_map = {'Player Wins': BLUE, 'Dealer Wins': PINK, 'Push (Tie)': GREEN}
     names = ['Player Wins', 'Dealer Wins', 'Push (Tie)']
