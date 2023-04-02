@@ -162,12 +162,12 @@ class ProbabilityTree:
         """
 
         if self.root.current_total >= target:
-            self.root.move = "stand"
+            self.root.move = "Stand"
             return self
 
         # recursive step
         else:
-            self.root.move = "hit"
+            self.root.move = "Hit"
             deck_class = decky.deck
 
             # compute all possible subtrees,
@@ -214,7 +214,7 @@ class ProbabilityTree:
 
         if current_value >= target:
             # in case recursed to a tree value greater than the target, which it SHOULDN'T
-            return 'stand'
+            return 'Stand'
 
         else:
 
@@ -229,9 +229,9 @@ class ProbabilityTree:
             print(stat)
 
             if stat <= threshold:
-                return "hit"
+                return "Hit"
             else:
-                return "stand"
+                return "Stand"
 
     # def tree_to_graph(self, graph: nx.Graph, d: int) -> None:
     #     """nrjknf
