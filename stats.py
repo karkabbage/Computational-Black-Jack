@@ -17,7 +17,6 @@ import plotly.io as pio
 import pandas as pd
 import black_jack_game as bj
 
-
 pio.renderers.default = "browser"
 PINK, BLUE, GREEN = '#f07ab1', '#7497db', '#9fdb74'
 
@@ -78,6 +77,14 @@ def graph_large_dataframe_original() -> None:
     graph_grouped_bar(df, title='1000 Original (Target=21) Black Jack Games with Various Configurations')
 
 
+def graph_large_dataframe_exper() -> None:
+    """Loads the large datafrae with 1000 original (target=21) Black Jack games with various configurations and
+    graphs it using a grouped bar plot.
+    """
+    df = load_csv('data/large_dataframe_experimental_500_games.csv')
+    graph_grouped_bar(df, title='500 Varied (Experimental) Black Jack Games with Various Configurations')
+
+
 def graph_line_plot_threshold() -> None:
     """Graph a line plot comparing player wins and the threshold value.
     """
@@ -88,7 +95,15 @@ def graph_line_plot_threshold() -> None:
     fig.show()
 
 
-# TODO generate and make for varied.
+def graph_line_plot_target() -> None:
+    """Graph a line plot comparing player wins and the threshold value.
+    """
+    df = load_csv('data/large_dataframe_experimental_500_games.csv')
+    df.drop([4, 5, 7, 8, 10, 11])  # Remove Basic game from this data, which does not have a threshold value
+    fig = px.scatter(df, x='Target', y='Player Wins', title='Correlation Between Targer and Number of Player Wins')
+    fig.show()
+
+
 # ====================================================================================================================
 # Generating, Loading, and Exporting CSV data
 # ====================================================================================================================
@@ -125,14 +140,14 @@ def gen_large_dataframe_varied(num_games: int) -> None:
         - num_games > 0
     """
     # Basic game strategy data at different targets
-    # df_basic_19 = create_dataframe_basic(19, num_games, True) #TODO remove??
+    df_basic_19 = create_dataframe_basic(19, num_games, True)
     df_basic_21 = create_dataframe_basic(21, num_games, True)
     df_basic_23 = create_dataframe_basic(23, num_games, True)
 
-    # Probability tree game strategy using different threshold and target values # TODO remove??
-    # df_stategic_19_0_0 = create_dataframe_strategic(19, 0.0, num_games, True)
-    # df_stategic_19_0_5 = create_dataframe_strategic(19, 0.5, num_games, True)
-    # df_stategic_19_0_7 = create_dataframe_strategic(19, 0.7, num_games, True)
+    # Probability tree game strategy using different threshold and target values
+    df_stategic_19_0_0 = create_dataframe_strategic(19, 0.0, num_games, True)
+    df_stategic_19_0_5 = create_dataframe_strategic(19, 0.5, num_games, True)
+    df_stategic_19_0_7 = create_dataframe_strategic(19, 0.7, num_games, True)
 
     df_stategic_21_0_0 = create_dataframe_strategic(21, 0.0, num_games, True)
     df_stategic_21_0_5 = create_dataframe_strategic(21, 0.5, num_games, True)
@@ -142,7 +157,8 @@ def gen_large_dataframe_varied(num_games: int) -> None:
     df_stategic_23_0_5 = create_dataframe_strategic(23, 0.5, num_games, True)
     df_stategic_23_0_7 = create_dataframe_strategic(23, 0.7, num_games, True)
 
-    df_all = pd.concat([df_basic_21, df_basic_23, df_stategic_21_0_0, df_stategic_21_0_5, df_stategic_21_0_7,
+    df_all = pd.concat([df_basic_21, df_basic_23, df_basic_19, df_stategic_19_0_0, df_stategic_19_0_5,
+                        df_stategic_19_0_7, df_stategic_21_0_0, df_stategic_21_0_5, df_stategic_21_0_7,
                         df_stategic_23_0_0, df_stategic_23_0_5, df_stategic_23_0_7], axis=0)
 
     df_all.to_csv('large_dataframe_experimental_' + str(num_games) + '_games.csv', index=False)
@@ -271,9 +287,9 @@ def graph_grouped_bar(df: pd.DataFrame, title: Optional[str] = None) -> None:
 if __name__ == '__main__':
     import python_ta
 
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'extra-imports': ['plotly.express', 'pandas', 'black_jack_game', 'plotly.io', 'Optional'],
-    #     'disable': [],
-    #     'allowed-io': []
-    # })
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'extra-imports': ['plotly.express', 'pandas', 'black_jack_game', 'plotly.io', 'Optional'],
+        'disable': [],
+        'allowed-io': []
+    })
