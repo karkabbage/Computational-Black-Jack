@@ -19,6 +19,7 @@ import black_jack_game as bj
 
 
 pio.renderers.default = "browser"
+PINK, BLUE, GREEN = '#f07ab1', '#7497db', '#9fdb74'
 
 
 # ====================================================================================================================
@@ -41,7 +42,7 @@ def gen_and_graph_basic_pie(target: int, num_games: int) -> None:
 def gen_and_graph_strategical_pie(target: int, num_games: int, threshold: float) -> None:
     """Create a pie chart with results for the specified number of games played using the probability tree strategy.
 
-    IMPORTANT: this strategy runs a lot slower due to the tree, more than 50 games becomes take 1 min +
+    IMPORTANT: this strategy runs a lot slower due to the tree, more than 100 games becomes take 1 min +
 
     Preconditions:
         - 0.0 <= threshold <= 1.0
@@ -57,7 +58,7 @@ def gen_and_graph_dual_bar(target: int, num_games: int, threshold: float) -> Non
     """Create a grouped bar graph with results for the specified number of games played using both the basic and
     probability tree strategy with the same overlap settings.
 
-    IMPORTANT: this strategy runs a lot slower due to the tree, more than 50 games becomes take 1 min +
+    IMPORTANT: this strategy runs a lot slower due to the tree, more than 100 games becomes take 1 min +
 
     Preconditions:
         - 0.0 <= threshold <= 1.0
@@ -83,6 +84,7 @@ def graph_line_plot_threshold() -> None:
     df = load_csv('data/large_dataframe_original_1000_games.csv')
     df.drop(0)  # Remove Basic game from this data, which does not have a threshold value
     fig = px.line(df, x='Threshold', y='Player Wins', title='Correlation Between Threshold and Number of Player Wins')
+    fig.update_traces(line_color=BLUE)
     fig.show()
 
 
@@ -236,7 +238,10 @@ def graph_pie_chart(df: pd.DataFrame, title: Optional[str] = None) -> None:
         - title must be a string
     """
     val = [df['Player Wins'][0], df['Dealer Wins'][0], df['Push (Tie)'][0]]
-    fig = px.pie(df, names=['Player Wins', 'Dealer Wins', 'Push (Tie)'], values=val, title=title)
+    colour_map = {'Player Wins': BLUE, 'Dealer Wins': PINK, 'Push (Tie)': GREEN}
+    names = ['Player Wins', 'Dealer Wins', 'Push (Tie)']
+    fig = px.pie(df, names=names, values=val, title=title, color=names,
+                 color_discrete_map=colour_map)
     fig.show()
 
 
@@ -247,12 +252,17 @@ def graph_grouped_bar(df: pd.DataFrame, title: Optional[str] = None) -> None:
     Preconditions
         - title must be a string
     """
+    colour_map = {'Player Wins': BLUE, 'Dealer Wins': PINK, 'Push (Tie)': GREEN}
+    names = ['Player Wins', 'Dealer Wins', 'Push (Tie)']
+
     fig = px.bar(
         data_frame=df,
         x='Game Mode',
-        y=['Player Wins', 'Dealer Wins', 'Push (Tie)'],
+        y=names,
         barmode='group',
-        title=title
+        title=title,
+        color_discrete_map=colour_map
+
     )
 
     fig.show()
@@ -261,9 +271,9 @@ def graph_grouped_bar(df: pd.DataFrame, title: Optional[str] = None) -> None:
 if __name__ == '__main__':
     import python_ta
 
-    python_ta.check_all(config={
-        'max-line-length': 120,
-        'extra-imports': ['plotly.express', 'pandas', 'black_jack_game', 'plotly.io', 'Optional'],
-        'disable': [],
-        'allowed-io': []
-    })
+    # python_ta.check_all(config={
+    #     'max-line-length': 120,
+    #     'extra-imports': ['plotly.express', 'pandas', 'black_jack_game', 'plotly.io', 'Optional'],
+    #     'disable': [],
+    #     'allowed-io': []
+    # })
