@@ -1,0 +1,7 @@
+Game Mode,Player Wins,Dealer Wins,Push (Tie),Target,Threshold
+Basic (tar=21),447,514,39,21,
+"Strategical (tar=21, thr=0.0)",487,459,54,21,0.0
+"Strategical (tar=21, thr=0.2)",463,479,58,21,0.2
+"Strategical (tar=21, thr=0.5)",462,471,67,21,0.5
+"Strategical (tar=21, thr=0.7)",390,516,94,21,0.7
+"Strategical (tar=21, thr=1.0)",161,816,23,21,1.0
