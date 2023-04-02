@@ -142,8 +142,10 @@ class ProbabilityTree:
             str_so_far += subtree._str_indented(indent + 1)
         return str_so_far
 
-    def tree_to_graph(self, graph: nx.Graph, root_id: int, id_count: int) -> None:
+    def tree_to_graph(self, graph: nx.Graph, root_id: int, counter: list) -> None:
         """ Represent a given probability tree as a NetworkX graph, using recursion.
+        Representation Invariant:
+        - counter != []
         """
         # base case
         if not self._subtrees:
@@ -153,10 +155,12 @@ class ProbabilityTree:
         else:
             adjacency_dict = {}
             temp = []
+            count = counter[- 1]
 
             for subtree in self._subtrees:
-                tpl = (self._subtrees[subtree].root.current_total, id_count)
-                id_count += 1
+                tpl = (self._subtrees[subtree].root.current_total, count)
+                count += 1
+                counter.append(count)
                 temp.append(tpl)
 
             adjacency_dict[(self.root.current_total, root_id)] = tuple(temp)
@@ -164,8 +168,8 @@ class ProbabilityTree:
             graph.add_edges_from(sub_graph.edges)
 
             for subtree in self._subtrees:
-                new_id = list(temp)[list(self._subtrees).index(subtree)][1]
-                self._subtrees[subtree].tree_to_graph(graph, new_id, id_count)
+                new_root_id = list(temp)[list(self._subtrees).index(subtree)][1]
+                self._subtrees[subtree].tree_to_graph(graph, new_root_id, counter)
 
 
 def draw_graph(graph: nx.Graph) -> None:
@@ -226,7 +230,7 @@ def run_smallest_tree() -> ProbabilityTree:
     """ slay
     """
     black_jack_intialized = bj.BlackJack()
-    pt = ProbabilityTree(18)
+    pt = ProbabilityTree(17)
     return pt.generate_tree(black_jack_intialized.deck)
 
 
@@ -235,7 +239,7 @@ def run_draw() -> None:
         *screams*
         *yeets off building*
     """
-    treey = run_smallest_tree()
+    treey = run_example_tree()
     graphy = nx.Graph()
-    treey.tree_to_graph(graphy, 0, 1)
+    treey.tree_to_graph(graphy, 0, [1])
     draw_graph(graphy)
