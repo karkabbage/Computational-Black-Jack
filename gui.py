@@ -3,6 +3,7 @@ data can be a part of the experience and put in their own spins on the work."""
 
 from tkinter import *
 import stats
+import graph
 
 
 def launch_gui() -> None:
@@ -20,8 +21,8 @@ def launch_gui() -> None:
     instructions_label = LabelFrame(blackjack, text="Introduction and Instruction", borderwidth=10, background="silver")
     my_message = Message(instructions_label,
                          text="In BlackJack there are a lot of different influences that come together "
-                              "that bring you closer to a win. Let us go see the statistics "
-                              "after running various different games and the visualizations"
+                              "that bring you closer to a win. Let us go see the results"
+                              "after running various different games through visualizations"
                               " this data brings!", aspect=800)
     # putting the label onto the screen
     black_jack_label.grid(row=0, column=0, padx=10, ipadx=10)
@@ -29,15 +30,16 @@ def launch_gui() -> None:
     instructions_label.grid(row=2, column=0)
     my_message.grid(row=2, column=0)
 
-    which_game = Label(blackjack, text="Choose Which Type of Game You Want To Be Played")
+    which_game = Label(blackjack, text="Choose What You Want to See Being Graphed")
     which_game.grid(row=5, column=0)
 
     which_version_of_tree = StringVar()
     which_version_of_tree.set("")
 
-    drop = OptionMenu(blackjack, which_version_of_tree, "Basic Pie Chart", "Single Strategical Pie Chart",
+    drop = OptionMenu(blackjack, which_version_of_tree, "Basic Pie Chart", "Strategical Tree Pie Chart",
                       "Dual Comparison Bar Graph", "Large Generated Example Data Original",
-                      "Large Generated Example Data Experimental", "Line Plot Threshold", "Line Plot Target")
+                      "Large Generated Example Data Experimental", "Line Plot Threshold", "Line Plot Target",
+                      "Example Probability Tree Structure", "Example Graph Structure")
     drop.grid(row=5, column=1)
 
     def basic_pie() -> None:
@@ -47,8 +49,9 @@ def launch_gui() -> None:
             """Graph the Basic Pie Chart"""
             stats.gen_and_graph_basic_pie(int(target.get()), int(number_of_games.get()))
 
-        num_game = Label(blackjack, text="Enter the Number of Games You Want to See as and Integer"
-                                         " Greater Than 0")
+        num_game = Label(blackjack, text="                                   Enter the Number of Games You "
+                                         "Want to See as and Integer Greater Than 0                            "
+                                         "                                        ")
         num_game.grid(row=7, column=0)
 
         number_of_games = Entry(blackjack, width=10)
@@ -75,8 +78,8 @@ def launch_gui() -> None:
             """Graph the Single Strategical Pie Chart"""
             stats.gen_and_graph_strategical_pie(int(target.get()), int(number_of_games.get()), float(threshold.get()))
 
-        num_game = Label(blackjack, text="Enter the Number of Games You Want to See as and Integer"
-                                         " Greater Than 0")
+        num_game = Label(blackjack, text="Enter the Number of Games You Want to See as an Integer"
+                                         " Greater Than 0 and Less Than 50 (Recommended For a Short Runtime)")
         num_game.grid(row=7, column=0)
 
         number_of_games = Entry(blackjack, width=10)
@@ -109,8 +112,8 @@ def launch_gui() -> None:
             """Graph the Dual Comparison Bar Graph"""
             stats.gen_and_graph_dual_bar(int(target.get()), int(number_of_games.get()), float(threshold.get()))
 
-        num_game = Label(blackjack, text="Enter the Number of Games You Want to See as and Integer"
-                                         " Greater Than 0")
+        num_game = Label(blackjack, text="Enter the Number of Games You Want to See as an Integer"
+                                         " Greater Than 0 and Less Than 50 (Recommended For A Short Runtime)")
         num_game.grid(row=7, column=0)
 
         number_of_games = Entry(blackjack, width=10)
@@ -209,10 +212,29 @@ def launch_gui() -> None:
 
             ready_to_play = Button(blackjack, text="Get Graphs", command=line_plot_target)
             ready_to_play.grid(row=17, column=0)
-        elif which_version_of_tree.get() == "Single Strategical Pie Chart":
+        elif which_version_of_tree.get() == "Strategical Tree Pie Chart":
             singl_strat()
         elif which_version_of_tree.get() == "Dual Comparison Bar Graph":
             dual_one()
+        elif which_version_of_tree.get() == "Example Probability Tree Structure":
+            something_to_cover()
+
+            def example_tree() -> None:
+                """Showcase the example tree structure with the value being 19"""
+                graph.run_draw()
+
+            ready_to_play = Button(blackjack, text="Get Graphs", command=example_tree)
+            ready_to_play.grid(row=17, column=0)
+        elif which_version_of_tree.get() == "Example Graph Structure":
+            something_to_cover()
+
+            def example_graph() -> None:
+                """Showcase the example graph structure with a small tree value"""
+                graph.run_example_tree()
+
+            ready_to_play = Button(blackjack, text="Get Graphs", command=example_graph)
+            ready_to_play.grid(row=17, column=0)
+
 
     get_stats = Button(blackjack, text="Enter", command=get_necessary_inputs)
     get_stats.grid(row=5, column=2)
