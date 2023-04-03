@@ -266,35 +266,35 @@ class ProbabilityTree:
                 self._subtrees[subtree].tree_to_graph(graph, new_root_id, counter)
 
 
-    def draw_graph(graph: nx.Graph) -> None:
-        """ Create a visual representation of a given NetworkX Graph
-        """
-        pos = {}
+def draw_graph(graph: nx.Graph) -> None:
+    """ Create a visual representation of a given NetworkX Graph
+    """
+    pos = {}
 
-        x = 0
-        for node in graph.nodes:
-            if list(node)[1] == 0:
-                y = 0
-            else:
-                x += 10
-                y = 0 - ((list(node)[1] - 1) // 13 + 1)
-            pos[node] = (x, y)
+    x = 0
+    for node in graph.nodes:
+        if list(node)[1] == 0:
+            y = 0
+        else:
+            x += 10
+            y = 0 - ((list(node)[1] - 1) // 13 + 1)
+        pos[node] = (x, y)
 
-        options = {
-            "font_size": 10,
-            "node_size": 2000,
-            "node_color": "white",
-            "edgecolors": "black",
-            "linewidths": 3,
-            "width": 3,
-        }
+    options = {
+        "font_size": 10,
+        "node_size": 2000,
+        "node_color": "white",
+        "edgecolors": "black",
+        "linewidths": 3,
+        "width": 3,
+    }
 
-        nx.draw_networkx(graph, pos, **options)
+    nx.draw_networkx(graph, pos, **options)
 
-        ax = plt.gca()
-        ax.margins(0.001)
-        plt.axis("off")
-        plt.show()
+    ax = plt.gca()
+    ax.margins(0.001)
+    plt.axis("off")
+    plt.show()
 
 
 def run_example_tree() -> ProbabilityTree:
