@@ -2,8 +2,7 @@
 
 Module Description
 ===============================
-lil shawtie the baddest and she got her ways aye bud
-
+This Python module contains the functions for the ProbabilityTree and graphing functions
 Copyright and Usage Information
 ===============================
 This file is provided solely for the personal and private use of the
@@ -17,6 +16,8 @@ This file is Copyright (c) 2023 Alessia Ruberto, Karyna Lim, Rachel Kim, Sasha C
 from __future__ import annotations
 from typing import Optional
 import black_jack_game as bj
+import networkx as nx
+import matplotlib.pyplot as plt
 
 
 class SumNode:
@@ -234,79 +235,66 @@ class ProbabilityTree:
             else:
                 return "Stand"
 
-    # def tree_to_graph(self, graph: nx.Graph, d: int) -> None:
-    #     """nrjknf
-    #     """
-    #     if not self._subtrees:
-    #         pass
-    #
-    #     else:
-    #         # add node version - FAIL --> values kept in this weird thing
-    #         '''sub_graph = nx.Graph()
-    #         temp = []
-    #         sub_graph.add_node(count, value=(self.root.current_total, d))
-    #         for subtree in self._subtrees:
-    #             count += 1
-    #             sub_graph.add_node(count, value=(self._subtrees[subtree].root.current_total, d + 1))
-    #             temp.append((0, count))
-    #         sub_graph.add_edges_from(temp)
-    #         graph.add_edges_from(sub_graph.edges)
-    # x
-    #         for subtree in self._subtrees:
-    #             self._subtrees[subtree].tree_to_graph(graph, d + 1, count + 1)'''
-    #
-    #         # labels version - FAIL --> the enumerate labels thing resets to 0 for the subtrees b/c recursion
-    #         '''temp = []
-    #         for subtree in self._subtrees:
-    #             tpl = (self._subtrees[subtree].root.current_total, d + 1)
-    #             temp.append(tpl)
-    #         labels = {i: l for i, l in enumerate(temp)}
-    #         nodes = labels.keys()
-    #         sub_graph = nx.Graph()
-    #         sub_graph.add_nodes_from(nodes)
-    #         graph.add_edges_from(sub_graph.edges)
-    #         for subtree in self._subtrees:
-    #             self._subtrees[subtree].tree_to_graph(graph, d + 1)'''
-    #
-    #         # ORIGINAL VERSION(adj_dict version) - FAIL --> later connects to existing nodes instead of making new ones
-    #         # --> BUT also most reliable of these attempts for stealing code
-    #         """adjacency_dict = {}
-    #         temp = []
-    #         for subtree in self._subtrees:
-    #             tpl = (self._subtrees[subtree].root.current_total, d + 1)
-    #             temp.append(tpl)
-    #         adjacency_dict[(self.root.current_total, d)] = tuple(temp)
-    #         sub_graph = nx.Graph(adjacency_dict)
-    #         graph.add_edges_from(sub_graph.edges)
-    #         for subtree in self._subtrees:
-    #             self._subtrees[subtree].tree_to_graph(graph, d + 1)"""
-    #
-    #
-    # def draw_graph(graph: nx.Graph) -> None:
-    #     """slnkfjsnf
-    #     """
-    #     pos = {}
-    #
-    #     for node in graph.nodes:
-    #         x = list(node)[0]
-    #         y = 0 - list(node)[1]
-    #         pos[node] = (x, y)
-    #
-    #     options = {
-    #         "font_size": 10,
-    #         "node_size": 2000,
-    #         "node_color": "white",
-    #         "edgecolors": "black",
-    #         "linewidths": 5,
-    #         "width": 5,
-    #     }
-    #
-    #     nx.draw_networkx(graph, pos, **options)
-    #
-    #     ax = plt.gca()
-    #     ax.margins(0.001)
-    #     plt.axis("off")
-    #     plt.show()
+    def tree_to_graph(self, graph: nx.Graph, root_id: int, counter: list) -> None:
+        """ Represent a given probability tree as a NetworkX graph, using recursion.
+        
+        Representation Invariant:
+        - counter != []
+        """
+        # base case
+        if not self._subtrees:
+            pass
+
+        # recursive step
+        else:
+            adjacency_dict = {}
+            temp = []
+            count = counter[- 1]
+
+            for subtree in self._subtrees:
+                tpl = (self._subtrees[subtree].root.current_total, count)
+                count += 1
+                counter.append(count)
+                temp.append(tpl)
+
+            adjacency_dict[(self.root.current_total, root_id)] = tuple(temp)
+            sub_graph = nx.Graph(adjacency_dict)
+            graph.add_edges_from(sub_graph.edges)
+
+            for subtree in self._subtrees:
+                new_root_id = list(temp)[list(self._subtrees).index(subtree)][1]
+                self._subtrees[subtree].tree_to_graph(graph, new_root_id, counter)
+
+
+    def draw_graph(graph: nx.Graph) -> None:
+        """ Create a visual representation of a given NetworkX Graph
+        """
+        pos = {}
+
+        x = 0
+        for node in graph.nodes:
+            if list(node)[1] == 0:
+                y = 0
+            else:
+                x += 10
+                y = 0 - ((list(node)[1] - 1) // 13 + 1)
+            pos[node] = (x, y)
+
+        options = {
+            "font_size": 10,
+            "node_size": 2000,
+            "node_color": "white",
+            "edgecolors": "black",
+            "linewidths": 3,
+            "width": 3,
+        }
+
+        nx.draw_networkx(graph, pos, **options)
+
+        ax = plt.gca()
+        ax.margins(0.001)
+        plt.axis("off")
+        plt.show()
 
 
 def run_example_tree() -> ProbabilityTree:
@@ -320,6 +308,22 @@ def run_example_tree() -> ProbabilityTree:
     black_jack_intialized.player.second_card = black_jack_intialized.deck.draw_card(black_jack_intialized.player)
     pt = ProbabilityTree(black_jack_intialized.player.sum_cards)
     return pt.generate_tree(black_jack_intialized.deck, 21)
+
+def run_smallest_tree() -> ProbabilityTree:
+    """ Runner function for a smaller tree for testing purposes
+    """
+    black_jack_intialized = bj.BlackJack()
+    pt = ProbabilityTree(19)
+    return pt.generate_tree(black_jack_intialized.deck)
+
+
+def run_draw() -> None:
+    """ Runner function to generate and draw a tree based off a generated ProbabilityTree
+    """
+    treey = run_smallest_tree()
+    graphy = nx.Graph()
+    treey.tree_to_graph(graphy, 0, [1])
+    draw_graph(graphy)
 
 
 if __name__ == '__main__':
