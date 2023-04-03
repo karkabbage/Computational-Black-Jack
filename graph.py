@@ -1,7 +1,7 @@
 """CSC111 Winter 2023 Project Phase 2: Black Jack Algorithim
 Module Description
 ===============================
-This Python module contains a baddie ehhhhhh               TODO remove profanities 😼
+This Python module contains the functions for the ProbabilityTree and Graph
 Copyright and Usage Information
 ===============================
 This file is provided solely for the personal and private use of the
@@ -139,6 +139,7 @@ class ProbabilityTree:
 
     def tree_to_graph(self, graph: nx.Graph, root_id: int, counter: list) -> None:
         """ Represent a given probability tree as a NetworkX graph, using recursion.
+        
         Representation Invariant:
         - counter != []
         """
@@ -210,7 +211,7 @@ if __name__ == '__main__':
 
 
 def run_example_tree() -> ProbabilityTree:
-    """hi"""
+    """Runner function for a ProbabilityTree for testing purposes"""
 
     black_jack_intialized = bj.BlackJack()
     black_jack_intialized.dealer.initial_face_up = black_jack_intialized.deck.draw_card(black_jack_intialized.dealer)
@@ -222,7 +223,7 @@ def run_example_tree() -> ProbabilityTree:
 
 
 def run_smallest_tree() -> ProbabilityTree:
-    """ slay
+    """ Runner function for a smaller tree for testing purposes
     """
     black_jack_intialized = bj.BlackJack()
     pt = ProbabilityTree(19)
@@ -230,9 +231,7 @@ def run_smallest_tree() -> ProbabilityTree:
 
 
 def run_draw() -> None:
-    """ *sobs*
-        *screams*
-        *yeets off building*
+    """ Runner function to generate and draw a tree based off a generated ProbabilityTree
     """
     treey = run_smallest_tree()
     graphy = nx.Graph()
