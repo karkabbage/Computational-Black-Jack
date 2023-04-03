@@ -2,8 +2,7 @@
 
 Module Description
 ===============================
-lil shawtie the baddest and she got her ways aye bud
-
+This Python module contains the functions for the ProbabilityTree and graphing functions
 Copyright and Usage Information
 ===============================
 This file is provided solely for the personal and private use of the
@@ -17,6 +16,8 @@ This file is Copyright (c) 2023 Alessia Ruberto, Karyna Lim, Rachel Kim, Sasha C
 from __future__ import annotations
 from typing import Optional
 import black_jack_game as bj
+import networkx as nx
+import matplotlib.pyplot as plt
 
 
 class SumNode:
@@ -233,6 +234,67 @@ class ProbabilityTree:
                 return "Hit"
             else:
                 return "Stand"
+            
+    def tree_to_graph(self, graph: nx.Graph, root_id: int, counter: list) -> None:
+        """ Represent a given probability tree as a NetworkX graph, using recursion.
+        
+        Representation Invariant:
+        - counter != []
+        """
+        # base case
+        if not self._subtrees:
+            pass
+
+        # recursive step
+        else:
+            adjacency_dict = {}
+            temp = []
+            count = counter[- 1]
+
+            for subtree in self._subtrees:
+                tpl = (self._subtrees[subtree].root.current_total, count)
+                count += 1
+                counter.append(count)
+                temp.append(tpl)
+
+            adjacency_dict[(self.root.current_total, root_id)] = tuple(temp)
+            sub_graph = nx.Graph(adjacency_dict)
+            graph.add_edges_from(sub_graph.edges)
+
+            for subtree in self._subtrees:
+                new_root_id = list(temp)[list(self._subtrees).index(subtree)][1]
+                self._subtrees[subtree].tree_to_graph(graph, new_root_id, counter)
+
+
+def draw_graph(graph: nx.Graph) -> None:
+    """ Create a visual representation of a given NetworkX Graph
+    """
+    pos = {}
+
+    x = 0
+    for node in graph.nodes:
+        if list(node)[1] == 0:
+            y = 0
+        else:
+            x += 10
+            y = 0 - ((list(node)[1] - 1) // 13 + 1)
+        pos[node] = (x, y)
+
+    options = {
+        "font_size": 10,
+        "node_size": 2000,
+        "node_color": "white",
+        "edgecolors": "black",
+        "linewidths": 3,
+        "width": 3,
+    }
+
+    nx.draw_networkx(graph, pos, **options)
+
+    ax = plt.gca()
+    ax.margins(0.001)
+    plt.axis("off")
+    plt.show()
 
 
 def generate_example_for_graphing() -> ProbabilityTree:
@@ -260,6 +322,15 @@ def run_example_tree() -> ProbabilityTree:
     return pt.generate_tree(black_jack_intialized.deck, 21)
 
 
+def run_draw() -> None:
+    """ Runner function to generate and draw a tree based off a generated ProbabilityTree
+    """
+    treey = generate_example_for_graphing()
+    graphy = nx.Graph()
+    treey.tree_to_graph(graphy, 0, [1])
+    draw_graph(graphy)
+
+    
 if __name__ == '__main__':
     ...
     import python_ta
